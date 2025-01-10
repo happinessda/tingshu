@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+
+<mapper namespace="com.atguigu.tingshu.album.mapper.BaseAttributeMapper">
+
+    <!--
+        mybatis 一对多的关系映射！
+        resultMap: 处理复杂的关系映射
+        resultType: 简单的单表查询
+
+        id: 表示唯一标识
+    -->
+    <resultMap id="BaseAttributeMap" type="com.atguigu.tingshu.model.album.BaseAttribute" autoMapping="true">
+        <!--
+            id: 主键
+                column: 表示sql语句执行后的字段名
+                property: 表示实体类属性名
+        -->
+        <id column="id" property="id"/>
+        <collection property="attributeValueList" ofType="com.atguigu.tingshu.model.album.BaseAttributeValue" autoMapping="true">
+            <!--
+               id: 主键
+                   column: 表示sql语句执行后的字段名
+                   property: 表示实体类属性名
+           -->
+            <id column="attribute_value_id" property="id"/>
+        </collection>
+
+    </resultMap>
+
+    <!--
+        自定义一个sql片段
+    -->
+    <sql id="baseSql">
+        ba.id,
+            ba.attribute_name,
+            ba.category1_id,
+            bav.id attribute_value_id,
+            bav.value_name,
+            bav.attribute_id
+    </sql>
+    <select id="selectAttribute" resultMap="BaseAttributeMap">
+        select
+        <include refid="baseSql"></include>
+        from base_attribute ba inner join base_attribute_value bav on ba.id = bav.attribute_id
+        where ba.category1_id = #{category1Id}
+    </select>
+</mapper>
+

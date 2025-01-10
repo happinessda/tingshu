@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+
+<mapper namespace="com.atguigu.tingshu.order.mapper.OrderInfoMapper">
+
+    <!--
+        配置一对多
+    -->
+    <resultMap id="OrderInfoMap" type="com.atguigu.tingshu.model.order.OrderInfo" autoMapping="true">
+        <!--
+            设置主键
+        -->
+        <id column="id" property="id"></id>
+
+        <!--
+            select 单步查询的方法名;
+            column: 单步查询的关联条件
+        -->
+        <collection property="orderDetailList" ofType="com.atguigu.tingshu.model.order.OrderDetail" autoMapping="true"
+                    select="selectDetail" column="id">
+
+        </collection>
+    </resultMap>
+    <!--
+            订单的字段
+        -->
+    <sql id="orderInfoSql">
+        oi
+        .
+        id
+        ,
+       oi.user_id,
+       oi.order_title,
+       oi.order_no,
+       oi.order_status,
+       oi.original_amount,
+       oi.derate_amount,
+       oi.order_amount,
+       oi.item_type,
+       oi.pay_way
+    </sql>
+    <!--
+        订单明细字段
+    -->
+    <sql id="orderDetailSql">
+        od
+        .
+        id
+        ,
+               od.item_id,
+               od.item_name,
+               od.item_url,
+               od.item_price
+    </sql>
+    <!--
+        根据状态，查看我的订单！
+        1.  先查询订单主表；
+        2.  根据条件查询订单明细表；
+    -->
+    <select id="selectUserPage" resultMap="OrderInfoMap">
+        select
+        <include refid="orderInfoSql"></include>
+        from order_info oi
+        <where>
+            oi.user_id = #{userId}
+            <if test="orderStatus!=null and orderStatus!=''">
+                and oi.order_status = #{orderStatus}
+            </if>
+        </where>
+        and oi.is_deleted = 0
+        order by oi.id desc
+    </select>
+    <!--
+   订单明细数据
+   -->
+    <select id="selectDetail" resultType="com.atguigu.tingshu.model.order.OrderDetail">
+        select
+        <include refid="orderDetailSql"></include>
+        from order_detail od
+        where od.order_id = #{id} and od.is_deleted = 0
+    </select>
+</mapper>
+
